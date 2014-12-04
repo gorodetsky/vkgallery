@@ -1,1 +1,1 @@
-include ':vkgallery'
+include ':vksdk_library',':vkgallery'

@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/vkgallery.iml" filepath="$PROJECT_DIR$/vkgallery.iml" />
       <module fileurl="file://$PROJECT_DIR$/vkgallery/vkgallery-vkgallery.iml" filepath="$PROJECT_DIR$/vkgallery/vkgallery-vkgallery.iml" />
+      <module fileurl="file://$PROJECT_DIR$/vksdk_library/vksdk_library.iml" filepath="$PROJECT_DIR$/vksdk_library/vksdk_library.iml" />
     </modules>
   </component>
 </project>
