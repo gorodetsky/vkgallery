@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <string name="vk_app_id">8E879B29B6D02D00E9DE4FD252FAE87B4C121241</string>
+
     <string name="app_name">vkgallery</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
 
+    <string name="alert_dialog_access_denied_title">Access denied</string>
+    <string name="alert_dialog_access_denied_message">There was an exception during VK.COM authorization</string>
+    <string name="alert_dialog_authorization_title">Authorization required</string>
+    <string name="alert_dialog_authorization_message">Authorize with your VK.COM account to use this app</string>
+
+    <string name="alert_dialog_ok">Ok</string>
+    <string name="alert_dialog_cancel">Cancel</string>
 </resources>
