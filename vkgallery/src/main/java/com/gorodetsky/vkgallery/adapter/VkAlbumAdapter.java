@@ -27,7 +27,7 @@ public class VkAlbumAdapter extends BaseAdapter {
     public static final int POSITION_PHOTOS_WALL = 1;
     public static final int POSITION_PHOTOS_SAVED = 2;
 
-    private static final String LOG_TAG = "vk_photo_adapter";
+    private static final String LOG_TAG = "vk_album_adapter";
     private static final String VK_API_PHOTOS_GET_ALBUMS = "photos.getAlbums";
 
     private List<VKApiPhotoAlbum> items;

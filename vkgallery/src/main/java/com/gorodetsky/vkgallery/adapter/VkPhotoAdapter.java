@@ -27,7 +27,7 @@ public class VkPhotoAdapter extends FragmentStatePagerAdapter {
     private static final String VK_ALBUM_WALL = "wall";
     private static final String VK_ALBUM_SAVED = "saved";
 
-    private List<VKApiPhoto> items;
+    private ArrayList<VKApiPhoto> items;
     private RequestListener listener;
 
     public VkPhotoAdapter(FragmentManager fm) {
@@ -52,6 +52,16 @@ public class VkPhotoAdapter extends FragmentStatePagerAdapter {
     @Override
     public int getItemPosition(Object object) {
         return POSITION_NONE;
+    }
+
+    public ArrayList<VKApiPhoto> getItems() {
+        return items;
+    }
+
+    public void setItems(List<VKApiPhoto> items) {
+        this.items.clear();
+        this.items.addAll(items);
+        notifyDataSetChanged();
     }
 
     public void loadPhotosTagged() {
@@ -89,8 +99,6 @@ public class VkPhotoAdapter extends FragmentStatePagerAdapter {
             super.onComplete(response);
             VKPhotoArray array = (VKPhotoArray) response.parsedModel;
             items.clear();
-            notifyDataSetChanged();
-
             items.addAll(array);
             notifyDataSetChanged();
         }
@@ -104,7 +112,7 @@ public class VkPhotoAdapter extends FragmentStatePagerAdapter {
         @Override
         public void onError(VKError error) {
             super.onError(error);
-            Log.e(LOG_TAG, error.toString());
+            Log.e(LOG_TAG, "Error! " + error.toString());
         }
     }
 }
