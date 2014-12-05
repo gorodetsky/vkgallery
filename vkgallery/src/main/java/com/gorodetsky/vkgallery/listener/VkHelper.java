@@ -1,13 +1,6 @@
 package com.gorodetsky.vkgallery.listener;
 
-import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentActivity;
-import android.support.v4.app.FragmentManager;
 import android.util.Log;
-import com.gorodetsky.vkgallery.R;
-import com.gorodetsky.vkgallery.activity.MainActivity;
-import com.gorodetsky.vkgallery.fragment.AlertDialogFragment;
 import com.vk.sdk.VKAccessToken;
 import com.vk.sdk.VKScope;
 import com.vk.sdk.VKSdk;
@@ -25,21 +18,22 @@ public class VkHelper extends VKSdkListener {
             VKScope.PHOTOS
     };
 
-    private FragmentActivity activity;
+    private String appToken;
+    private AuthHelperListener listener;
     private boolean pending = false;
 
-    public VkHelper(FragmentActivity activity) {
-        this.activity = activity;
+    public VkHelper(String appToken) {
+        this.appToken = appToken;
+        initialize();
     }
 
-    public void initialize() {
-        VKSdk.initialize(this, activity.getString(R.string.vk_app_id));
-        if (VKSdk.wakeUpSession()) {
-            setPendingStopped();
-        }
+    public void setListener(AuthHelperListener listener) {
+        this.listener = listener;
     }
 
     public void authorize() {
+        if (isPending()) return;
+
         setPending();
         VKSdk.authorize(SCOPE);
     }
@@ -65,16 +59,8 @@ public class VkHelper extends VKSdkListener {
     @Override
     public void onAccessDenied(VKError authorizationError) {
         Log.e(LOG_TAG, authorizationError.toString());
-
+        if (listener != null) listener.onAuthError();
         setPendingStopped();
-
-        FragmentManager manager = activity.getSupportFragmentManager();
-        if (manager.findFragmentByTag(MainActivity.TAG_VK_ACCESS_DENIED) == null) {
-            new AlertDialogFragment.Builder()
-                    .setTitle(R.string.alert_dialog_access_denied_title)
-                    .setMessage(R.string.alert_dialog_access_denied_message)
-                    .create().show(manager, MainActivity.TAG_VK_ACCESS_DENIED);
-        }
     }
 
     @Override
@@ -95,25 +81,14 @@ public class VkHelper extends VKSdkListener {
         setPendingStopped();
     }
 
-    private void showAuthorizationDialog() {
-        FragmentManager manager = activity.getSupportFragmentManager();
-        if (manager.findFragmentByTag(MainActivity.TAG_VK_AUTH) == null) {
-            new AlertDialogFragment.Builder()
-                    .setTag(MainActivity.DIALOG_AUTH)
-                    .setTitle(R.string.alert_dialog_authorization_title)
-                    .setMessage(R.string.alert_dialog_authorization_message)
-                    .setPositiveCaption(R.string.alert_dialog_ok)
-                    .setNegativeCaption(R.string.alert_dialog_cancel)
-                    .create().show(manager, MainActivity.TAG_VK_AUTH);
+    private void initialize() {
+        VKSdk.initialize(this, appToken);
+        if (VKSdk.wakeUpSession()) {
+            setPendingStopped();
+        } else {
+            if (listener != null) listener.onAuthShow();
         }
     }
-
-// TODO: delete
-//    private void closeAuthorizationDialog() {
-//        FragmentManager manager = activity.getSupportFragmentManager();
-//        Fragment fragment = manager.findFragmentByTag(MainActivity.TAG_VK_AUTH);
-//        if (fragment != null) ((DialogFragment) fragment).dismiss();
-//    }
 
     private void setPending() {
         pending = true;
@@ -121,8 +96,11 @@ public class VkHelper extends VKSdkListener {
 
     private void setPendingStopped() {
         pending = false;
-        if (!VKSdk.isLoggedIn()) {
-            showAuthorizationDialog();
+
+        if (VKSdk.isLoggedIn()) {
+            if (listener != null) listener.onAuthSuccess();
+        } else {
+            if (listener != null) listener.onAuthShow();
         }
     }
 }

@@ -2,22 +2,40 @@ package com.gorodetsky.vkgallery.activity;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import com.gorodetsky.vkgallery.R;
+import com.gorodetsky.vkgallery.adapter.VkAlbumAdapter;
+import com.gorodetsky.vkgallery.fragment.AlertDialogFragment;
+import com.gorodetsky.vkgallery.fragment.PlaceholderFragment;
+import com.gorodetsky.vkgallery.listener.AuthHelperListener;
 import com.gorodetsky.vkgallery.listener.DialogClickListener;
 import com.gorodetsky.vkgallery.listener.VkHelper;
 import com.vk.sdk.VKUIHelper;
+import com.vk.sdk.api.*;
+import com.vk.sdk.api.model.VKApiPhotoAlbum;
 
-public class MainActivity extends ActionBarActivity implements DialogClickListener {
+public class MainActivity extends ActionBarActivity implements DialogClickListener,
+        AuthHelperListener, AdapterView.OnItemClickListener {
 
     public static final int DIALOG_AUTH = 1;
 
     public static final String TAG_VK_AUTH = "vk_auth";
     public static final String TAG_VK_ACCESS_DENIED = "access_denied";
 
+    private static final String LOG_TAG = "main_activity";
+
     private VkHelper helper;
+    private DrawerLayout drawer;
+    private ListView list;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,15 +43,39 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
 
         setContentView(R.layout.activity_main);
 
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        list = (ListView) findViewById(R.id.left_drawer);
+        list.setAdapter(new VkAlbumAdapter());
+        list.setOnItemClickListener(this);
+
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction()
+                    .add(R.id.container, new PlaceholderFragment())
+                    .commit();
+        }
+
         VKUIHelper.onCreate(this);
-        helper = new VkHelper(this);
-        helper.initialize();
+        helper = new VkHelper(getString(R.string.vk_app_id));
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         VKUIHelper.onResume(this);
+
+        if (helper.isLoggedIn()) {
+            onAuthSuccess();
+        } else {
+            onAuthShow();
+        }
+        helper.setListener(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        helper.setListener(null);
     }
 
     @Override
@@ -87,5 +129,47 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
             default:
                 break;
         }
+    }
+
+    @Override
+    public void onAuthSuccess() {
+    }
+
+    @Override
+    public void onAuthError() {
+        showAuthErrorDialog();
+    }
+
+    @Override
+    public void onAuthShow() {
+        showAuthorizationDialog();
+    }
+
+    private void showAuthErrorDialog() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(TAG_VK_ACCESS_DENIED) == null) {
+            new AlertDialogFragment.Builder()
+                    .setTitle(R.string.alert_dialog_access_denied_title)
+                    .setMessage(R.string.alert_dialog_access_denied_message)
+                    .create().show(manager, TAG_VK_ACCESS_DENIED);
+        }
+    }
+
+    private void showAuthorizationDialog() {
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.findFragmentByTag(MainActivity.TAG_VK_AUTH) == null) {
+            new AlertDialogFragment.Builder()
+                    .setTag(DIALOG_AUTH)
+                    .setTitle(R.string.alert_dialog_authorization_title)
+                    .setMessage(R.string.alert_dialog_authorization_message)
+                    .setPositiveCaption(R.string.alert_dialog_ok)
+                    .setNegativeCaption(R.string.alert_dialog_cancel)
+                    .create().show(manager, TAG_VK_AUTH);
+        }
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        parent.getAdapter();
     }
 }
