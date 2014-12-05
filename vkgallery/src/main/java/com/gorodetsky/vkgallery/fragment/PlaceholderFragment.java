@@ -22,8 +22,10 @@ public class PlaceholderFragment extends Fragment {
 
     private static final String LOG_TAG = "placeholder";
     private static final String KEY_PHOTOS = "photos";
+    private static final int OFFSCREEN_PAGE_COUNT = 3;
 
     private VkPhotoAdapter photoAdapter;
+    private ViewPager pager;
 
     public PlaceholderFragment() {
         super();
@@ -45,17 +47,21 @@ public class PlaceholderFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreateView(inflater, container, savedInstanceState);
 
-        ViewPager pager = (ViewPager) inflater.inflate(R.layout.fragment_placeholder, container, false);
+        pager = (ViewPager) inflater.inflate(R.layout.fragment_placeholder, container, false);
+        pager.setOffscreenPageLimit(OFFSCREEN_PAGE_COUNT);
         pager.setPageTransformer(false, new ParallaxPagerTransformer(R.id.image_vk_photo));
         pager.setAdapter(photoAdapter);
         return pager;
     }
 
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putParcelableArrayList(KEY_PHOTOS, photoAdapter.getItems());
+    }
+
+    public void setPagerPosition(int position) {
+        pager.setCurrentItem(0);
     }
 
     public VkPhotoAdapter getPhotoAdapter() {

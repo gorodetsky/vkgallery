@@ -64,6 +64,11 @@ public class VkPhotoAdapter extends FragmentStatePagerAdapter {
         notifyDataSetChanged();
     }
 
+    public void clear() {
+        items.clear();
+        notifyDataSetChanged();
+    }
+
     public void loadPhotosTagged() {
         VKRequest request = new VKRequest(VK_API_PHOTOS_TAGGED);
         executeRequest(request);

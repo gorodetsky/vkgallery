@@ -5,6 +5,7 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -18,7 +19,9 @@ import com.gorodetsky.vkgallery.fragment.PlaceholderFragment;
 import com.gorodetsky.vkgallery.listener.AuthHelperListener;
 import com.gorodetsky.vkgallery.listener.DialogClickListener;
 import com.gorodetsky.vkgallery.listener.VkHelper;
+import com.vk.sdk.VKSdk;
 import com.vk.sdk.VKUIHelper;
+import com.vk.sdk.api.VKApi;
 import com.vk.sdk.api.model.VKApiPhotoAlbum;
 
 public class MainActivity extends ActionBarActivity implements DialogClickListener,
@@ -31,6 +34,8 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
     public static final String TAG_PLACEHOLDER = "placeholder";
 
     private static final String LOG_TAG = "main_activity";
+
+    private static boolean loaded = false;
 
     private VkHelper helper;
     private DrawerLayout drawer;
@@ -63,7 +68,7 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
         VKUIHelper.onResume(this);
 
         if (helper.isLoggedIn()) {
-            onAuthSuccess();
+            if (!loaded) onAuthSuccess();
         } else {
             onAuthShow();
         }
@@ -92,15 +97,15 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
+        return super.onCreateOptionsMenu(menu);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.action_logout:
+                logout();
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
@@ -134,6 +139,8 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
     public void onAuthSuccess() {
         VkAlbumAdapter adapter = (VkAlbumAdapter) list.getAdapter();
         adapter.downloadAlbums();
+        getPlaceholder().getPhotoAdapter().loadPhotosTagged();
+        loaded = true;
     }
 
     @Override
@@ -171,10 +178,9 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        FragmentManager manager = getSupportFragmentManager();
-        PlaceholderFragment fragment = (PlaceholderFragment) manager.findFragmentByTag(TAG_PLACEHOLDER);
-        if (fragment == null) return;
-        VkPhotoAdapter photoAdapter = fragment.getPhotoAdapter();
+        PlaceholderFragment placeholder = getPlaceholder();
+        if (placeholder == null) return;
+        VkPhotoAdapter photoAdapter = placeholder.getPhotoAdapter();
 
         switch (position) {
             case VkAlbumAdapter.POSITION_PHOTOS_PROFILE:
@@ -195,5 +201,19 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
                 photoAdapter.loadPhotosAlbum(album.getId());
                 break;
         }
+        placeholder.setPagerPosition(0);
+        drawer.closeDrawers();
+    }
+
+    private PlaceholderFragment getPlaceholder() {
+        FragmentManager manager = getSupportFragmentManager();
+        return (PlaceholderFragment) manager.findFragmentByTag(TAG_PLACEHOLDER);
+    }
+
+    private void logout() {
+        VKSdk.logout();
+        showAuthorizationDialog();
+        getPlaceholder().getPhotoAdapter().clear();
+        loaded = false;
     }
 }

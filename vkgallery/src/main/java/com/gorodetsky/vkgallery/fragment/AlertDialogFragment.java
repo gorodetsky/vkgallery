@@ -67,8 +67,15 @@ public class AlertDialogFragment extends DialogFragment {
         }
 
         if (titleRes != 0) builder.setTitle(titleRes);
-        if (messageRes != 0) builder.setMessage(titleRes);
+        if (messageRes != 0) builder.setMessage(messageRes);
         return builder.create();
+    }
+
+    @Override
+    public void onCancel(DialogInterface dialog) {
+        super.onCancel(dialog);
+        final DialogClickListener listener = (DialogClickListener) getActivity();
+        listener.onNegativeClick(getArguments().getInt(KEY_TAG));
     }
 
     public static class Builder {
