@@ -5,22 +5,20 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import com.gorodetsky.vkgallery.R;
 import com.gorodetsky.vkgallery.adapter.VkAlbumAdapter;
+import com.gorodetsky.vkgallery.adapter.VkPhotoAdapter;
 import com.gorodetsky.vkgallery.fragment.AlertDialogFragment;
 import com.gorodetsky.vkgallery.fragment.PlaceholderFragment;
 import com.gorodetsky.vkgallery.listener.AuthHelperListener;
 import com.gorodetsky.vkgallery.listener.DialogClickListener;
 import com.gorodetsky.vkgallery.listener.VkHelper;
 import com.vk.sdk.VKUIHelper;
-import com.vk.sdk.api.*;
 import com.vk.sdk.api.model.VKApiPhotoAlbum;
 
 public class MainActivity extends ActionBarActivity implements DialogClickListener,
@@ -30,6 +28,7 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
 
     public static final String TAG_VK_AUTH = "vk_auth";
     public static final String TAG_VK_ACCESS_DENIED = "access_denied";
+    public static final String TAG_PLACEHOLDER = "placeholder";
 
     private static final String LOG_TAG = "main_activity";
 
@@ -50,7 +49,7 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.container, new PlaceholderFragment(), TAG_PLACEHOLDER)
                     .commit();
         }
 
@@ -133,6 +132,8 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
 
     @Override
     public void onAuthSuccess() {
+        VkAlbumAdapter adapter = (VkAlbumAdapter) list.getAdapter();
+        adapter.downloadAlbums();
     }
 
     @Override
@@ -170,6 +171,29 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
 
     @Override
     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        parent.getAdapter();
+        FragmentManager manager = getSupportFragmentManager();
+        PlaceholderFragment fragment = (PlaceholderFragment) manager.findFragmentByTag(TAG_PLACEHOLDER);
+        if (fragment == null) return;
+        VkPhotoAdapter photoAdapter = fragment.getPhotoAdapter();
+
+        switch (position) {
+            case VkAlbumAdapter.POSITION_PHOTOS_PROFILE:
+                photoAdapter.loadPhotosTagged();
+                break;
+
+            case VkAlbumAdapter.POSITION_PHOTOS_WALL:
+                photoAdapter.loadPhotosWall();
+                break;
+
+            case VkAlbumAdapter.POSITION_PHOTOS_SAVED:
+                photoAdapter.loadPhotosSaved();
+                break;
+
+            default:
+                VkAlbumAdapter albumAdapter = (VkAlbumAdapter) parent.getAdapter();
+                VKApiPhotoAlbum album = (VKApiPhotoAlbum) albumAdapter.getItem(position);
+                photoAdapter.loadPhotosAlbum(album.getId());
+                break;
+        }
     }
 }

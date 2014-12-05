@@ -9,13 +9,12 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 import com.gorodetsky.vkgallery.R;
 import com.gorodetsky.vkgallery.model.VKApiPhotoAlbumArray;
+import com.gorodetsky.vkgallery.utility.Configuration;
 import com.vk.sdk.api.*;
 import com.vk.sdk.api.model.VKApiPhotoAlbum;
-import com.vk.sdk.api.model.VKPhotoArray;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.zip.Inflater;
 
 /**
  * Created by st on 12/5/14.
@@ -24,9 +23,9 @@ public class VkAlbumAdapter extends BaseAdapter {
 
     public static final int DEFAULT_ITEMS_COUNT = 3;
 
-    public static final int POSITION_PHOTOS_ALL = 0;
-    public static final int POSITION_PHOTOS_WITH_ME = 1;
-    public static final int POSITION_PHOTOS_USER = 2;
+    public static final int POSITION_PHOTOS_PROFILE = 0;
+    public static final int POSITION_PHOTOS_WALL = 1;
+    public static final int POSITION_PHOTOS_SAVED = 2;
 
     private static final String LOG_TAG = "vk_photo_adapter";
     private static final String VK_API_PHOTOS_GET_ALBUMS = "photos.getAlbums";
@@ -39,7 +38,7 @@ public class VkAlbumAdapter extends BaseAdapter {
 
     public void downloadAlbums() {
         VKRequest request = new VKRequest(VK_API_PHOTOS_GET_ALBUMS,
-                VKParameters.from(VKApiConst.USER_ID, "0"));
+                VKParameters.from(VKApiConst.USER_ID, Configuration.VK_USER_ID));
         request.setModelClass(VKApiPhotoAlbumArray.class);
 
         request.executeWithListener(new VKRequest.VKRequestListener() {
@@ -48,6 +47,7 @@ public class VkAlbumAdapter extends BaseAdapter {
             public void onComplete(VKResponse response) {
                 super.onComplete(response);
                 VKApiPhotoAlbumArray array = (VKApiPhotoAlbumArray) response.parsedModel;
+                items.clear();
                 items.addAll(array);
                 notifyDataSetChanged();
                 Log.d(LOG_TAG, response.responseString);
@@ -94,16 +94,16 @@ public class VkAlbumAdapter extends BaseAdapter {
         }
         TextView textView = (TextView) convertView.findViewById(android.R.id.text1);
         switch (position) {
-            case POSITION_PHOTOS_ALL:
-                textView.setText(R.string.photos_all);
+            case POSITION_PHOTOS_PROFILE:
+                textView.setText(R.string.photos_profile);
                 break;
 
-            case POSITION_PHOTOS_WITH_ME:
-                textView.setText(R.string.photos_with_me);
+            case POSITION_PHOTOS_WALL:
+                textView.setText(R.string.photos_wall);
                 break;
 
-            case POSITION_PHOTOS_USER:
-                textView.setText(R.string.photos_user);
+            case POSITION_PHOTOS_SAVED:
+                textView.setText(R.string.photos_saved);
                 break;
 
             default:

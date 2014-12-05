@@ -18,7 +18,7 @@ public class VkPhotoFragment extends Fragment {
 
     private String url;
 
-    static VkPhotoFragment newInstance(String imageUrl) {
+    public static VkPhotoFragment newInstance(String imageUrl) {
         VkPhotoFragment fragment = new VkPhotoFragment();
         Bundle args = new Bundle();
         args.putString(KEY_IMAGE_URL, imageUrl);

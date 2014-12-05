@@ -12,9 +12,9 @@
     <string name="alert_dialog_authorization_title">Authorization required</string>
     <string name="alert_dialog_authorization_message">Authorize with your VK.COM account to use this app</string>
 
-    <string name="photos_all">All photos</string>
-    <string name="photos_with_me">Photos with me</string>
-    <string name="photos_user">Photos I like</string>
+    <string name="photos_profile">With me</string>
+    <string name="photos_wall">From wall</string>
+    <string name="photos_saved">Saved</string>
 
     <string name="alert_dialog_ok">Ok</string>
     <string name="alert_dialog_cancel">Cancel</string>
