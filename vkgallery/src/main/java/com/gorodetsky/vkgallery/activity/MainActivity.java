@@ -86,6 +86,7 @@ public class MainActivity extends ActionBarActivity implements DialogClickListen
     protected void onDestroy() {
         super.onDestroy();
         VKUIHelper.onDestroy(this);
+        loaded = false;
     }
 
     @Override
